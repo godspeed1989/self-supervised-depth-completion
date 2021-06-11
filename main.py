@@ -40,9 +40,9 @@ parser.add_argument('-c',
                     ' (default: l2)')
 parser.add_argument('-b',
                     '--batch-size',
-                    default=1,
+                    default=2,
                     type=int,
-                    help='mini-batch size (default: 1)')
+                    help='mini-batch size (default: 2)')
 parser.add_argument('--lr',
                     '--learning-rate',
                     default=1e-5,
@@ -67,7 +67,7 @@ parser.add_argument('--resume',
                     metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('--data-folder',
-                    default='../data',
+                    default='./data_example',
                     type=str,
                     metavar='PATH',
                     help='data folder (default: none)')
@@ -105,8 +105,8 @@ parser.add_argument(
     '--train-mode',
     type=str,
     default="dense",
-    choices=["dense", "sparse", "photo", "sparse+photo", "dense+photo"],
-    help='dense | sparse | photo | sparse+photo | dense+photo')
+    choices=["dense", "sparse", "sparse+photo", "dense+photo"],
+    help='dense | sparse | sparse+photo | dense+photo')
 parser.add_argument('-e', '--evaluate', default='', type=str, metavar='PATH')
 parser.add_argument('--cpu', action="store_true", help='run on cpu')
 
@@ -154,7 +154,7 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
     meters = [block_average_meter, average_meter]
 
     # switch to appropriate mode
-    assert mode in ["train", "val", "eval", "test_prediction", "test_completion"], \
+    assert mode in ["train", "val", "eval", "test_completion"], \
         "unsupported mode: {}".format(mode)
     if mode == 'train':
         model.train()
@@ -170,7 +170,7 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
             for key, val in batch_data.items() if val is not None
         }
         gt = batch_data[
-            'gt'] if mode != 'test_prediction' and mode != 'test_completion' else None
+            'gt'] if mode != 'test_completion' else None
         data_time = time.time() - start
 
         start = time.time()
@@ -231,7 +231,7 @@ def iterate(mode, args, loader, model, optimizer, logger, epoch):
         with torch.no_grad():
             mini_batch_size = next(iter(batch_data.values())).size(0)
             result = Result()
-            if mode != 'test_prediction' and mode != 'test_completion':
+            if mode != 'test_completion':
                 result.evaluate(pred.data, gt.data, photometric_loss)
             [
                 m.update(result, gpu_time, data_time, mini_batch_size)

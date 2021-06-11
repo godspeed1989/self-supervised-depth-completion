@@ -96,13 +96,6 @@ def get_paths_and_transform(split, args):
         glob_rgb = os.path.join(
             args.data_folder,
             "depth_selection/test_depth_completion_anonymous/image/*.png")
-    elif split == "test_prediction":
-        transform = no_transform
-        glob_d = None
-        glob_gt = None  #"test_depth_completion_anonymous/"
-        glob_rgb = os.path.join(
-            args.data_folder,
-            "depth_selection/test_depth_prediction_anonymous/image/*.png")
     else:
         raise ValueError("Unrecognized split " + str(split))
 
@@ -115,11 +108,7 @@ def get_paths_and_transform(split, args):
         # test only has d or rgb
         paths_rgb = sorted(glob.glob(glob_rgb))
         paths_gt = [None] * len(paths_rgb)
-        if split == "test_prediction":
-            paths_d = [None] * len(
-                paths_rgb)  # test_prediction has no sparse depth
-        else:
-            paths_d = sorted(glob.glob(glob_d))
+        paths_d = sorted(glob.glob(glob_d))
 
     if len(paths_d) == 0 and len(paths_rgb) == 0 and len(paths_gt) == 0:
         raise (RuntimeError("Found 0 images under {}".format(glob_gt)))
